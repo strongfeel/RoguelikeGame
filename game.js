@@ -35,10 +35,8 @@ function displayStatus(stage, player, monster) {
   console.log(chalk.magentaBright(`=====================\n`));
 }
 
-// 시간 늦추기
 function sleep(ms) {
-  const wakeUpTime = Date.now() + ms;
-  while (Date.now() < wakeUpTime) {}
+  return new Promise((r) => setTimeout(r, ms));
 }
 
 const battle = async (stage, player, monster) => {
@@ -65,14 +63,14 @@ const battle = async (stage, player, monster) => {
         logs.push(`[${cnt}]` + monster.attack());
         player.hp -= monster.atk;
       } else {
-        logs.push(`[${cnt}]` + chalk.blue('축하합니다! 몬스터를 쓰러트렸습니다!'));
+        console.log(chalk.blue('축하합니다! 몬스터를 쓰러트렸습니다!'));
         player.hp = 100;
-        sleep(1000);
+        await sleep(3000);
         break;
       }
     } else if (choice === '2') {
-      logs.push(`[${cnt}]` + chalk.yellow('싸움에서 도망을 쳤습니다.'));
-      sleep(1000);
+      console.log(chalk.yellow('싸움에서 도망을 쳤습니다.'));
+      await sleep(3000);
       break;
     } else {
       logs.push(chalk.green('정확한 번호를 입력해 주세요'));
@@ -80,7 +78,8 @@ const battle = async (stage, player, monster) => {
 
     // 스테이지 클리어 및 게임 종료 조건
     if (player.hp <= 0) {
-      console.log('플레이어가 사망했습니다.');
+      console.log(chalk.yellow('플레이어가 사망했습니다.'));
+      console.log(chalk.yellow('게임 오버'));
     }
   }
 };
@@ -93,12 +92,11 @@ export async function startGame() {
   while (stage <= 10) {
     const monster = new Monster(stage);
     await battle(stage, player, monster);
-
     stage++;
   }
 
   // 스테이지 클리어 및 게임 종료 조건
   if (stage > 10 && player.hp > 0) {
-    console.log('모든 스테이지를 완료하였습니다.');
+    console.log(chalk.yellow('모든 스테이지를 완료하였습니다.'));
   }
 }
