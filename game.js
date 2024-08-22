@@ -11,15 +11,6 @@ class Player {
     // 플레이어의 공격
     return chalk.red(`몬스터에게 ${this.atk}의 피해를 입혔습니다.`);
   }
-
-  shield() {
-    // 플레이어 방어
-    if (rand() < 7) {
-      return chalk.cyanBright(`방어를 성공했습니다.`);
-    } else {
-      return chalk.cyanBright(`방어를 실패했습니다.`);
-    }
-  }
 }
 
 class Monster {
@@ -35,12 +26,10 @@ class Monster {
 }
 
 function sleep(ms) {
-  // break구문 딜레이
   return new Promise((r) => setTimeout(r, ms));
 }
 
 function rand() {
-  // 랜덤한 숫자 출력
   return Math.floor(Math.random() * 10);
 }
 
@@ -64,7 +53,7 @@ const battle = async (stage, player, monster) => {
 
     logs.forEach((log) => console.log(log));
 
-    console.log(chalk.green(`\n1. 공격한다 2. 방어한다. 3. 도망간다`));
+    console.log(chalk.green(`\n1. 공격한다 2. 도망간다.`));
     const choice = readlineSync.question('당신의 선택은? ');
 
     // 플레이어의 선택에 따라 다음 행동 처리
@@ -80,42 +69,13 @@ const battle = async (stage, player, monster) => {
       } else {
         console.log(chalk.blue('축하합니다! 몬스터를 쓰러트렸습니다!'));
         player.hp = 100 + rand();
-        player.atk += rand();
+        player.atk = player.atk + rand();
         await sleep(3000);
         break;
       }
     } else if (choice === '2') {
-      cnt++;
-      logs.push(`[${cnt}]` + player.shield());
-      if (rand() < 7) {
-        logs.push(`[${cnt}]` + chalk.cyanBright('반격으로 60%의 데미지를 몬스터에게 입혔습니다.'));
-        monster.hp -= Math.round(player.atk * 0.6);
-        if (monster.hp > 0) {
-          logs.push(`[${cnt}]` + monster.attack());
-          player.hp -= monster.atk;
-        } else {
-          console.log(chalk.blue('축하합니다! 몬스터를 쓰러트렸습니다!'));
-          player.hp = 100 + rand();
-          player.atk += rand();
-          await sleep(3000);
-          break;
-        }
-      } else {
-        logs.push(`[${cnt}]` + chalk.cyanBright('방어 실패로 플레이어가 데미지를 입었습니다.'));
-        if (monster.hp > 0) {
-          logs.push(`[${cnt}]` + monster.attack());
-          player.hp -= monster.atk;
-        } else {
-          console.log(chalk.blue('축하합니다! 몬스터를 쓰러트렸습니다!'));
-          player.hp = 100 + rand();
-          player.atk += rand();
-          await sleep(3000);
-          break;
-        }
-      }
-    } else if (choice === '3') {
       console.log(chalk.yellow('싸움에서 도망을 쳤습니다.'));
-      player.hp = 100;
+      console.log(chalk.yellow('도망을 쳤기 때문에, 체력 회복은 불가 합니다.'));
       await sleep(3000);
       break;
     } else {
