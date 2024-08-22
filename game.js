@@ -15,7 +15,7 @@ class Player {
 
 class Monster {
   constructor(stage) {
-    this.hp = 20 + stage;
+    this.hp = 100 + stage;
     this.atk = 10 + stage;
   }
 
@@ -23,6 +23,14 @@ class Monster {
     // 몬스터의 공격
     return chalk.red(`당신은 ${this.atk}의 피해를 입었습니다.`);
   }
+}
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+function rand() {
+  return Math.floor(Math.random() * 10);
 }
 
 function displayStatus(stage, player, monster) {
@@ -33,10 +41,6 @@ function displayStatus(stage, player, monster) {
       chalk.redBright(`| Monster HP : ${monster.hp}, Attack: ${monster.atk} |`),
   );
   console.log(chalk.magentaBright(`=====================\n`));
-}
-
-function sleep(ms) {
-  return new Promise((r) => setTimeout(r, ms));
 }
 
 const battle = async (stage, player, monster) => {
@@ -64,12 +68,14 @@ const battle = async (stage, player, monster) => {
         player.hp -= monster.atk;
       } else {
         console.log(chalk.blue('축하합니다! 몬스터를 쓰러트렸습니다!'));
-        player.hp = 100;
+        player.hp = 100 + rand();
+        player.atk = player.atk + rand();
         await sleep(3000);
         break;
       }
     } else if (choice === '2') {
       console.log(chalk.yellow('싸움에서 도망을 쳤습니다.'));
+      player.hp = 100;
       await sleep(3000);
       break;
     } else {
