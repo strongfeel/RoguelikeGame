@@ -11,6 +11,26 @@ class Player {
     // 플레이어의 공격
     return chalk.red(`몬스터에게 ${this.atk}의 피해를 입혔습니다.`);
   }
+
+  doubleAtk() {
+    // 플레이어 연속 공격
+    return chalk.red(`연속 공격 성공! 몬스터에게 ${this.atk * 2}의 피해를 입혔습니다.`);
+  }
+
+  doubleAtkFail() {
+    // 플레이어 연속 공격 실패
+    return chalk.gray(`공격 실패!`);
+  }
+
+  shield() {
+    // 플레이어 방어 성공
+    return chalk.cyanBright('방어 성공! \n반격으로 60%의 데미지를 몬스터에게 입혔습니다. ');
+  }
+
+  shieldFail() {
+    // 플레이어 방어 실패
+    return chalk.gray('방어 실패! 플레이어가 데미지를 입었습니다. ');
+  }
 }
 
 class Monster {
@@ -21,7 +41,7 @@ class Monster {
 
   attack() {
     // 몬스터의 공격
-    return chalk.red(`당신은 ${this.atk}의 피해를 입었습니다.`);
+    return chalk.magenta(`플레이어는 ${this.atk}의 피해를 입었습니다.`);
   }
 }
 
@@ -55,7 +75,11 @@ const battle = async (stage, player, monster) => {
 
     logs.forEach((log) => console.log(log));
 
-    console.log(chalk.green(`\n1. 공격한다 2. 방어한다. 3. 도망간다`));
+    console.log(
+      chalk.green(
+        `\n1. 공격한다 2. 연속공격(30%) 3. 방어한다(60%). 4. 즉사스킬사용(10%) 5. 도망간다`,
+      ),
+    );
     const choice = readlineSync.question('당신의 선택은? ');
 
     // 플레이어의 선택에 따라 다음 행동 처리
@@ -78,9 +102,30 @@ const battle = async (stage, player, monster) => {
       }
     } else if (choice === '2') {
       cnt++;
-      if (rand() < 7) {
-        logs.push(`[${cnt}]` + chalk.cyanBright('방어 성공!'));
-        logs.push(`[${cnt}]` + chalk.cyanBright('반격으로 60%의 데미지를 몬스터에게 입혔습니다.'));
+      if (rand() < 3) {
+        logs.push(`[${cnt}]` + player.doubleAtk());
+        monster.hp -= player.atk * 2;
+        if (monster.hp > 0) {
+          logs.push(`[${cnt}]` + monster.attack());
+          player.hp -= monster.atk;
+          await sleep(1000);
+        } else {
+          console.log(chalk.blue('축하합니다! 몬스터를 쓰러트렸습니다!'));
+          player.hp = 100 + rand();
+          player.atk += rand();
+          await sleep(3000);
+          break;
+        }
+      } else {
+        logs.push(`[${cnt}]` + player.doubleAtkFail());
+        logs.push(`[${cnt}]` + monster.attack());
+        player.hp -= monster.atk;
+        await sleep(1000);
+      }
+    } else if (choice === '3') {
+      cnt++;
+      if (rand() < 6) {
+        logs.push(`[${cnt}]` + player.shield());
         monster.hp -= Math.round(player.atk * 0.6);
         await sleep(1000);
         if (monster.hp <= 0) {
@@ -91,12 +136,12 @@ const battle = async (stage, player, monster) => {
           break;
         }
       } else {
-        logs.push(`[${cnt}]` + chalk.cyanBright('방어 실패! 플레이어가 데미지를 입었습니다.'));
+        logs.push(`[${cnt}]` + player.shieldFail());
         logs.push(`[${cnt}]` + monster.attack());
         player.hp -= monster.atk;
         await sleep(1000);
       }
-    } else if (choice === '3') {
+    } else if (choice === '5') {
       console.log(chalk.yellow('싸움에서 도망을 쳤습니다.'));
       console.log(chalk.yellow('도망친 후 체력 회복은 불가 합니다.'));
       await sleep(3000);
