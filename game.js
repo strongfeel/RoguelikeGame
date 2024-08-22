@@ -75,7 +75,7 @@ const battle = async (stage, player, monster) => {
       }
     } else if (choice === '2') {
       console.log(chalk.yellow('싸움에서 도망을 쳤습니다.'));
-      player.hp = 100;
+      console.log(chalk.yellow('도망을 쳤기 때문에, 체력 회복은 불가 합니다.'));
       await sleep(3000);
       break;
     } else {
