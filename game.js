@@ -19,7 +19,7 @@ class Player {
 
   doubleAtkFail() {
     // 플레이어 연속 공격 실패
-    return chalk.gray(`공격 실패!`);
+    return chalk.gray(`연속 공격 실패!`);
   }
 
   shield() {
@@ -30,6 +30,14 @@ class Player {
   shieldFail() {
     // 플레이어 방어 실패
     return chalk.gray('방어 실패! 플레이어가 데미지를 입었습니다. ');
+  }
+
+  skill() {
+    return chalk.red('스킬 사용 성공! 몬스터가 쓰러집니다.');
+  }
+
+  skillFail() {
+    return chalk.gray('스킬 사용 실패! 플레이어가 데미지를 입었습니다. ');
   }
 }
 
@@ -65,6 +73,17 @@ function displayStatus(stage, player, monster) {
   console.log(chalk.magentaBright(`=====================\n`));
 }
 
+function playerUpgrade(player) {
+  // 몬스터 쓰러트린후 플레이어 체력 및 공격력 증진
+  player.hp = 100 + rand();
+  player.atk += rand();
+}
+
+function monsterAttack(cnt, player, monster, logs) {
+  logs.push(`[${cnt}]` + monster.attack());
+  player.hp -= monster.atk;
+}
+
 const battle = async (stage, player, monster) => {
   let logs = [];
   let cnt = 0;
@@ -90,13 +109,11 @@ const battle = async (stage, player, monster) => {
       logs.push(`[${cnt}]` + player.attack());
       monster.hp -= player.atk;
       if (monster.hp > 0) {
-        logs.push(`[${cnt}]` + monster.attack());
-        player.hp -= monster.atk;
+        monsterAttack(cnt, player, monster, logs);
         await sleep(1000);
       } else {
         console.log(chalk.blue('축하합니다! 몬스터를 쓰러트렸습니다!'));
-        player.hp = 100 + rand();
-        player.atk += rand();
+        playerUpgrade(player);
         await sleep(3000);
         break;
       }
@@ -106,13 +123,11 @@ const battle = async (stage, player, monster) => {
         logs.push(`[${cnt}]` + player.doubleAtk());
         monster.hp -= player.atk * 2;
         if (monster.hp > 0) {
-          logs.push(`[${cnt}]` + monster.attack());
-          player.hp -= monster.atk;
+          monsterAttack(cnt, player, monster, logs);
           await sleep(1000);
         } else {
           console.log(chalk.blue('축하합니다! 몬스터를 쓰러트렸습니다!'));
-          player.hp = 100 + rand();
-          player.atk += rand();
+          playerUpgrade(player);
           await sleep(3000);
           break;
         }
@@ -130,15 +145,27 @@ const battle = async (stage, player, monster) => {
         await sleep(1000);
         if (monster.hp <= 0) {
           console.log(chalk.blue('축하합니다! 몬스터를 쓰러트렸습니다!'));
-          player.hp = 100 + rand();
-          player.atk += rand();
+          playerUpgrade(player);
           await sleep(3000);
           break;
         }
       } else {
         logs.push(`[${cnt}]` + player.shieldFail());
-        logs.push(`[${cnt}]` + monster.attack());
-        player.hp -= monster.atk;
+        monsterAttack(cnt, player, monster, logs);
+        await sleep(1000);
+      }
+    } else if (choice === '4') {
+      cnt++;
+      if (rand() < 1) {
+        logs.push(`[${cnt}]` + player.skill());
+        monster.hp = 0;
+        console.log(chalk.blue('축하합니다! 즉사 스킬로 인하여 몬스터가 쓰러졌습니다!'));
+        playerUpgrade(player);
+        await sleep(3000);
+        break;
+      } else {
+        logs.push(`[${cnt}]` + player.skillFail());
+        monsterAttack(cnt, player, monster, logs);
         await sleep(1000);
       }
     } else if (choice === '5') {
