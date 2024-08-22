@@ -15,7 +15,7 @@ class Player {
 
 class Monster {
   constructor(stage) {
-    this.hp = 100 + stage;
+    this.hp = 50 + stage;
     this.atk = 10 + stage;
   }
 
